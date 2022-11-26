@@ -1,5 +1,5 @@
 /-  spider
-/+  strandio
+/+  strandio, *hue-json-decoder
 =,  strand=strand:spider
 ^-  thread:spider
 |=  arg=vase
@@ -16,4 +16,7 @@
   (strand-fail:strand %bad-sign ~)
 ?~  full-file.client-response.q.res
   (strand-fail:strand %no-body ~)
-(pure:m !>(`@t`q.data.u.full-file.client-response.q.res))
+=/  resp  `@t`q.data.u.full-file.client-response.q.res
+=/  jon  (de-json:html resp)
+=/  state  (state-from-json (need jon))
+(pure:m !>([->:state +<+:state]))

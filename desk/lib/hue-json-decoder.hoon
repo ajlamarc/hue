@@ -1,11 +1,8 @@
+/-  *hue
 |%
 +$  tokens
-  $:  access-token=@t
-      refresh-token=@t
-  ==
-+$  state
-  $:  on=?
-      bri=@ud
+  $:  =access-token
+      =refresh-token
   ==
 ::
 ++  tokens-from-json
@@ -23,20 +20,14 @@
   :~  :-  %success
       %-  ot
       :~  username+so
-      ==
-  ==
-:: ++  state-from-json
-::   =,  dejs:format
-::   ^-  $-(json state)
-::   %-  ar
-::   %-  ot
-::   :~  :-  %success
-::       %-  ot
-::       :~  ['/groups/0/action/on' bo]
-::       ==
-::   :-  %success
-::       %-  ot
-::       :~  ['/groups/0/action/bri' ni]
-::       ==
-::   ==
+  ==  ==
+++  state-from-json
+  =,  dejs:format
+  %-  ar
+  %-  ot
+  :~  :-  %success
+      %-  of
+      :~  '/groups/0/action/on'^bo
+          '/groups/0/action/bri'^ni
+  ==  ==
 --

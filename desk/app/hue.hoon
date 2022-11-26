@@ -1,66 +1,44 @@
-/-  *hue
-/+  default-agent, dbug, *encode-request-body, *hue-json-decoder, *hue-json-encoder
+::  https://www.diffchecker.com/u4nXfLzA
+/-  hue
+/+  default-agent,
+    dbug,
+    *encode-request-body,
+    *hue-json-encoder
 |%
 +$  versioned-state
   $%  state-0
   ==
-+$  state-0  $:
-  %0  url=@t  code=@t  username=@t  access-token=@t
-  refresh-token=@t  on=?(%.y %.n)  bri=@ud
-  logs=(list [@da ? @ud])
-==
+::
++$  state-0
+  $:  %0
+      =url:hue
+      =code:hue
+      =username:hue
+      =access-token:hue
+      =refresh-token:hue
+      =on:hue
+      =bri:hue
+      =logs:hue
+    ==
+::
 +$  card  card:agent:gall
-++  change-light-state
-  |=  [url=@t on=?(%.y %.n) bri=@ud username=@t access-token=@t]
-  =/  body  ~[['on' b+on] ['bri' n+`@t`(scot %ud bri)]]
-  =/  auth  `@t`(cat 3 'Bearer ' access-token)
-  :*  %pass  /light  %arvo  %k  %fard
-    %hue  %put-request  %noun
-    !>  :+
-        `@t`(rap 3 url username '/groups/0/action' ~)
-        :~  ['Content-Type' 'application/json']
-            ['Authorization' auth]
-        ==
-        (encode-request-body body)
-  ==
-++  setup-with-code
-  |=  [code=@t]
-  :*  %pass  /setup  %arvo  %k  %fard
-    %hue  %setup-bridge  %noun
-    !>  [code]
-  ==
-++  set-refresh-timer
-  |=  [now=@da]
-  [%pass /refresh %arvo %b %wait (add ~d6 now)]
-++  refresh-tokens
-  |=  [refresh-token=@t]
-  =/  url  'https://api.meethue.com/oauth2/refresh?grant_type=refresh_token'
-  =/  headers  ~[['Authorization' 'Basic ZWF6UGRNWkJHOUxIZkdCb2lkN3REbVpyekNlN0VGM1Y6aWxiTXkwZkxsajlPT29jZw=='] ['Content-Type' 'application/x-www-form-urlencoded']]
-  =/  body  (some (as-octt:mimes:html (weld "refresh_token=" (trip refresh-token))))
-  :*  %pass  /tokens  %arvo  %k  %fard
-    %hue  %post-for-tokens  %noun
-    !>  [url headers body]
-  ==
 --
 %-  agent:dbug
 =|  state-0
 =*  state  -
 ^-  agent:gall
+=<
 |_  =bowl:gall
 +*  this  .
   def   ~(. (default-agent this %.n) bowl)
+  hc    ~(. +> bowl)
 ++  on-init
   ^-  (quip card _this)
   :-  ~
   %=  this
     url  'https://api.meethue.com/route/api/'
-    code  ''
-    username  ''
-    access-token  ''
-    refresh-token  ''
     on  %.n
     bri  254
-    logs  *(list [@da ? @ud])
   ==
 ++  on-save
   ^-  vase
@@ -83,22 +61,22 @@
   ::
   ^-  (quip card _this)
   ?>  ?=(%hue-action mark)
-  =/  act  !<(action vase)
+  =/  act  !<(action:hue vase)
   ?-  -.act
       %toggle
     :_  this  :~  
-      %-  change-light-state
+      %-  change-light-state:hc
           [url +.act bri username access-token]
     ==
   ::
       %bri
     :_  this  :~  
-      %-  change-light-state
+      %-  change-light-state:hc
           [url %.y +.act username access-token]
     ==
   ::
       %code
-    :_  this  ~[(setup-with-code +.act)]
+    [~[(setup-with-code +.act)] this]
   ==
 ++  on-watch  on-watch:def
 ++  on-leave  on-leave:def
@@ -126,12 +104,12 @@
       [%light ~]
     ?>  ?=([%khan %arow *] sign)
     ?:  ?=(%.y -.p.sign)
-      =/  resp  !<(@t q.p.p.sign)
-      ::=/  jon  (de-json:html resp)
-      ::=/  state  (state-from-json (need jon))
+      =/  state  q.q.p.p.sign
       ::=/ new-logs (limo (welp ~[[now.bowl on.state bri.state]] logs))
-      ::`this(logs new-logs, on on.state, bri bri.state)
-      `this
+      ::  enforce type constraints on state response
+      ?^  +.state  !!
+      `this(on ?~(-.state %.y %.n), bri `@ud`+.state)
+      ::`this
     `this :: error! TODO
     ::
       [%setup ~]
@@ -139,13 +117,13 @@
     ?:  ?=(%.y -.p.sign)
       =/  resp  !<  
         $:  
-          username=@t 
-          code=@t 
-          access-token=@t 
-          refresh-token=@t
+          =username:hue
+          =code:hue
+          =access-token:hue
+          =refresh-token:hue
         ==
         q.p.p.sign
-      :-  ~[(set-refresh-timer now.bowl)]  
+      :-  ~[(set-refresh-timer:hc now.bowl)]  
       %=  this
         username  username.resp
         code  code.resp
@@ -158,13 +136,13 @@
     ::
       [%refresh ~]
     ?>  ?=([%behn %wake *] sign)
-    :_  this  ~[(refresh-tokens refresh-token)]
+    [~[(refresh-tokens:hc refresh-token)] this]
     ::
       [%tokens ~]
     ?>  ?=([%khan %arow *] sign)
     ?:  ?=(%.y -.p.sign)
-      =/  resp  !<([access-token=@t refresh-token=@t] q.p.p.sign)
-      :-  ~[(set-refresh-timer now.bowl)]
+      =/  resp  !<([=access-token:hue =refresh-token:hue] q.p.p.sign)
+      :-  ~[(set-refresh-timer:hc now.bowl)]
       %=  this
         access-token  access-token.resp
         refresh-token  refresh-token.resp
@@ -172,4 +150,41 @@
     `this :: error! TODO
   ==
 ++  on-fail   on-fail:def
+--
+|_  =bowl:gall
+::
+++  change-light-state
+|=  [=url:hue =on:hue =bri:hue =username:hue =access-token:hue]
+  =/  body  ~[['on' b+on] ['bri' n+`@t`(scot %ud bri)]]
+  =/  auth  `@t`(cat 3 'Bearer ' access-token)
+  :*  %pass  /light  %arvo  %k  %fard
+    %hue  %put-request  %noun
+    !>  :+
+        `@t`(rap 3 url username '/groups/0/action' ~)
+        :~  ['Content-Type' 'application/json']
+            ['Authorization' auth]
+        ==
+        (encode-request-body body)
+  ==
+::
+++  setup-with-code
+|=  [=code:hue]
+  :*  %pass  /setup  %arvo  %k  %fard
+    %hue  %setup-bridge  %noun
+    !>  [code]
+  ==
+::
+++  set-refresh-timer
+|=  [now=@da]
+  [%pass /refresh %arvo %b %wait (add ~d6 now)]
+::
+++  refresh-tokens
+|=  [=refresh-token:hue]
+  =/  url  'https://api.meethue.com/oauth2/refresh?grant_type=refresh_token'
+  =/  headers  ~[['Authorization' 'Basic ZWF6UGRNWkJHOUxIZkdCb2lkN3REbVpyekNlN0VGM1Y6aWxiTXkwZkxsajlPT29jZw=='] ['Content-Type' 'application/x-www-form-urlencoded']]
+  =/  body  (some (as-octt:mimes:html (weld "refresh_token=" (trip refresh-token))))
+  :*  %pass  /tokens  %arvo  %k  %fard
+    %hue  %post-for-tokens  %noun
+    !>  [url headers body]
+  ==
 --

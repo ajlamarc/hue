@@ -1,9 +1,5 @@
+/-  *hue
 |%
-+$  update
-  $:  on=?
-      bri=@ud
-      code=@t
-  ==
 ::
 ++  update-to-json
   |=  upd=update
