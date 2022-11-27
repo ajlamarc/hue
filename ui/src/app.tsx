@@ -1,9 +1,9 @@
+// @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import Urbit from '@urbit/http-api';
 import { MantineProvider, Image, Switch, Slider, Button, Card, Tabs, ScrollArea } from '@mantine/core';
-import hue_off from "./assets/hue-off.jpeg";
-import hue_on from "./assets/hue-on.jpeg";
-import { SelectPopover } from '@mantine/core/lib/Select/SelectPopover/SelectPopover';
+import hue_off from "./assets/hue-off.png";
+import hue_on from "./assets/hue-on.png";
 
 const api = new Urbit('', '', window.desk);
 api.ship = window.ship;

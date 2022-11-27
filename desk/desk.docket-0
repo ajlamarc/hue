@@ -1,10 +1,11 @@
-:~  title+'hue'
-    info+'fixme'
-    color+0xff.4400
-    image+'https://freedom-club.sfo2.digitaloceanspaces.com/props/quartus/long-logo/ab_Quartus-05_only.png'
-    glob-http+['https://bootstrap.urbit.org/glob-0v5.hurm4.ejod5.ngg9h.iub9i.n1j7o.glob' 0v5.hurm4.ejod5.ngg9h.iub9i.n1j7o]
-    base+'hue'
-    version+[0 0 1]
-    website+'https://dalten.org/'
-    license+'REKT'
+:~
+  title+'hue'
+  info+'demo for the hue lightbulb application on urbit'
+  color+0x10.0000
+  version+[0 0 1]
+  website+'https://dalten.org/'
+  license+'REKT'
+  image+'https://pbs.twimg.com/profile_images/1563190365095505921/BH7MiViE_400x400.jpg'
+  base+'hue'
+  glob-http+['https://gateway.pinata.cloud/ipfs/QmaEbLWc1ckuD6QLESKbcUNimqk9Dabm95P4N9xuLAhSfn' 0v2.9soje.mo0m0.15dio.2t1ll.ao33p]
 ==

@@ -83,7 +83,7 @@
   ::  scry from frontend, asking for current state.
   ::
   ^-  (unit (unit cage))
-  ?+    path  !!
+  ?+    path  ~|(bad-scry-path/path !!)
       [%x %update ~]
     ``json+!>((update-to-json [on bri code]))
       ::
