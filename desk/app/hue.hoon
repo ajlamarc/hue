@@ -1,4 +1,3 @@
-::  https://www.diffchecker.com/u4nXfLzA
 /-  hue
 /+  default-agent,
     dbug,
@@ -28,10 +27,10 @@
 =*  state  -
 ^-  agent:gall
 =<
-|_  =bowl:gall
+|_  bol=bowl:gall
 +*  this  .
-  def   ~(. (default-agent this %.n) bowl)
-  hc    ~(. +> bowl)
+  def   ~(. (default-agent this %.n) bol)
+  hc    ~(. +> bol)
 ++  on-init
   ^-  (quip card _this)
   :-  ~
@@ -64,19 +63,17 @@
   =/  act  !<(action:hue vase)
   ?-  -.act
       %toggle
-    :_  this  :~  
-      %-  change-light-state:hc
-          [url +.act bri username access-token]
-    ==
+    :_  this
+    %-  change-light-state:hc
+    [url +.act bri username access-token]
   ::
       %bri
-    :_  this  :~  
-      %-  change-light-state:hc
-          [url %.y +.act username access-token]
-    ==
+    :_  this
+    %-  change-light-state:hc
+    [url %.y +.act username access-token]
   ::
       %code
-    [~[(setup-with-code +.act)] this]
+    [(setup-with-code +.act) this]
   ==
 ++  on-watch  on-watch:def
 ++  on-leave  on-leave:def
@@ -86,9 +83,13 @@
   ::  scry from frontend, asking for current state.
   ::
   ^-  (unit (unit cage))
-  ?>  ?=([%x %update ~] path)
-  :^  ~  ~  %json
-  !>  (update-to-json [on bri code])
+  ?+    path  !!
+      [%x %update ~]
+    ``json+!>((update-to-json [on bri code]))
+      ::
+      [%x %logs ~]
+    ``json+!>(a+(limo logs))
+  ==
 ++  on-agent  on-agent:def
 ++  on-arvo
   |=  [=wire sign=sign-arvo]
@@ -105,11 +106,10 @@
     ?>  ?=([%khan %arow *] sign)
     ?:  ?=(%.y -.p.sign)
       =/  state  q.q.p.p.sign
-      ::=/ new-logs (limo (welp ~[[now.bowl on.state bri.state]] logs))
-      ::  enforce type constraints on state response
-      ?^  +.state  !!
-      `this(on ?~(-.state %.y %.n), bri `@ud`+.state)
-      ::`this
+      =/  new-on  ;;(? -.state)
+      =/  new-bri  ;;(@ud +.state)
+      =/  new-log  a+(limo ~[(sect:enjs:format now.bol) b+new-on (numb:enjs:format new-bri)])
+      `this(on new-on, bri new-bri, logs (welp ~[new-log] logs))
     `this :: error! TODO
     ::
       [%setup ~]
@@ -123,7 +123,7 @@
           =refresh-token:hue
         ==
         q.p.p.sign
-      :-  ~[(set-refresh-timer:hc now.bowl)]  
+      :-  (set-refresh-timer:hc now.bol)
       %=  this
         username  username.resp
         code  code.resp
@@ -136,13 +136,14 @@
     ::
       [%refresh ~]
     ?>  ?=([%behn %wake *] sign)
-    [~[(refresh-tokens:hc refresh-token)] this]
+    [(refresh-tokens:hc refresh-token) this]
     ::
       [%tokens ~]
     ?>  ?=([%khan %arow *] sign)
     ?:  ?=(%.y -.p.sign)
-      =/  resp  !<([=access-token:hue =refresh-token:hue] q.p.p.sign)
-      :-  ~[(set-refresh-timer:hc now.bowl)]
+      =/  resp
+        !<([=access-token:hue =refresh-token:hue] q.p.p.sign)
+      :-  (set-refresh-timer:hc now.bol)
       %=  this
         access-token  access-token.resp
         refresh-token  refresh-token.resp
@@ -151,40 +152,43 @@
   ==
 ++  on-fail   on-fail:def
 --
-|_  =bowl:gall
+|_  bol=bowl:gall
 ::
 ++  change-light-state
 |=  [=url:hue =on:hue =bri:hue =username:hue =access-token:hue]
+|^
   =/  body  ~[['on' b+on] ['bri' n+`@t`(scot %ud bri)]]
   =/  auth  `@t`(cat 3 'Bearer ' access-token)
-  :*  %pass  /light  %arvo  %k  %fard
-    %hue  %put-request  %noun
-    !>  :+
-        `@t`(rap 3 url username '/groups/0/action' ~)
-        :~  ['Content-Type' 'application/json']
-            ['Authorization' auth]
-        ==
-        (encode-request-body body)
+  =;  cag=cage
+    [%pass /light %arvo %k %fard %hue %put-request cag]~
+  :-  %noun
+  !>  ^-  [@t (list [@t @t]) (unit octs)]
+  :-  `@t`(rap 3 url username '/groups/0/action' ~)
+  :_  (encode-request-body body)
+  :~  ['Content-Type' 'application/json']
+      ['Authorization' auth]
   ==
+--
 ::
 ++  setup-with-code
 |=  [=code:hue]
-  :*  %pass  /setup  %arvo  %k  %fard
-    %hue  %setup-bridge  %noun
-    !>  [code]
-  ==
+^-  (list card)
+  [%pass /setup %arvo %k %fard %hue %setup-bridge noun+!>(code)]~
 ::
 ++  set-refresh-timer
 |=  [now=@da]
-  [%pass /refresh %arvo %b %wait (add ~d6 now)]
-::
+^-  (list card)
+  [%pass /refresh %arvo %b %wait (add ~d6 now)]~
 ++  refresh-tokens
 |=  [=refresh-token:hue]
-  =/  url  'https://api.meethue.com/oauth2/refresh?grant_type=refresh_token'
-  =/  headers  ~[['Authorization' 'Basic ZWF6UGRNWkJHOUxIZkdCb2lkN3REbVpyekNlN0VGM1Y6aWxiTXkwZkxsajlPT29jZw=='] ['Content-Type' 'application/x-www-form-urlencoded']]
-  =/  body  (some (as-octt:mimes:html (weld "refresh_token=" (trip refresh-token))))
-  :*  %pass  /tokens  %arvo  %k  %fard
-    %hue  %post-for-tokens  %noun
-    !>  [url headers body]
+^-  (list card)
+  =;  cag=cage
+    [%pass /tokens %arvo %k %fard %hue %post-for-tokens cag]~
+  :-  %noun
+  !>  ^-  [url=@t headers=(list [@t @t]) body=(unit octs)]
+  :-  'https://api.meethue.com/oauth2/refresh?grant_type=refresh_token'
+  :_  (some (as-octt:mimes:html (weld "refresh_token=" (trip refresh-token))))
+  :~  ['Authorization' 'Basic ZWF6UGRNWkJHOUxIZkdCb2lkN3REbVpyekNlN0VGM1Y6aWxiTXkwZkxsajlPT29jZw==']
+      ['Content-Type' 'application/x-www-form-urlencoded']
   ==
 --

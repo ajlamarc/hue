@@ -7,7 +7,7 @@
 +$  access-token    @t
 +$  refresh-token   @t
 ::
-+$  logs  (list [@da on bri])
++$  logs  (list json)
 +$  action
   $%  [%toggle =on]
       [%bri =bri]
