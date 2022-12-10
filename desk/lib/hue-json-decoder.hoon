@@ -13,6 +13,7 @@
     [`@tas`'access_token' so]
     [`@tas`'refresh_token' so]
   ==
+::
 ++  username-from-json
   =,  dejs:format
   %-  ar
@@ -21,6 +22,7 @@
       %-  ot
       :~  username+so
   ==  ==
+::
 ++  state-from-json
   |=  [group=@t state=json]
   =,  dejs:format
@@ -35,4 +37,15 @@
           s-bri^ni
   ==  ==
   state
+::
+++  group-from-json
+  =,  dejs:format
+  %-  ot
+  ~[action/(ot ~[on/bo bri/ni])]
+::
+++  groups-from-json
+  =,  dejs:format
+  %-  om
+  %-  ot
+  ~[name/so]
 --

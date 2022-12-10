@@ -19,6 +19,7 @@
       =bri:hue
       =logs:hue
       =group:hue
+      =group-names:hue
     ==
 ::
 +$  card  card:agent:gall
@@ -79,7 +80,9 @@
     [(setup-with-code +.act) this]
   ::
       %group
-    `this(group +.act)
+    :_  this(group +.act)
+    %-  refresh-groups:hc
+    [url username access-token +.act]
   ==
 ++  on-watch  on-watch:def
 ++  on-leave  on-leave:def
@@ -91,7 +94,7 @@
   ^-  (unit (unit cage))
   ?+    path  ~|(bad-scry-path/path !!)
       [%x %update ~]
-    ``json+!>((update-to-json [on bri code group]))
+    ``json+!>((update-to-json [on bri code group group-names]))
       ::
       [%x %logs ~]
     ``json+!>(a+(limo logs))
@@ -111,6 +114,23 @@
   ::
   ^-  (quip card _this)
   ?+  wire  (on-arvo:def wire sign)
+      [%group ~]
+    ?>  ?=([%khan %arow *] sign)
+    ?:  ?=(%.y -.p.sign)
+      =/  resp  !<  
+        $:
+          state=[=on:hue =bri:hue]
+          =group-names:hue
+        ==
+        q.p.p.sign
+      :-  ~
+      %=  this
+        on  on.state.resp
+        bri  bri.state.resp
+        group-names  group-names.resp
+      ==
+    `this
+    ::
       [%light ~]
     ?>  ?=([%khan %arow *] sign)
     ?:  ?=(%.y -.p.sign)
@@ -118,9 +138,13 @@
       =/  new-on  ;;(? -.state)
       =/  new-bri  ;;(@ud +.state)
       =/  new-log  a+(limo ~[(sect:enjs:format now.bol) s+group b+new-on (numb:enjs:format new-bri)])
-      ?:  (gte (lent logs) 10)
-        `this(on new-on, bri new-bri, logs (welp ~[new-log] (snip logs)))
-      `this(on new-on, bri new-bri, logs (welp ~[new-log] logs))
+      =/  l
+        %+  welp
+          ~[new-log]
+        ?:  (gte (lent logs) 10)
+          (snip logs)
+        logs
+      `this(on new-on, bri new-bri, logs l)
     `this :: error! TODO
     ::
       [%setup ~]
@@ -130,6 +154,7 @@
         $:  
           =username:hue
           =code:hue
+          =group-names:hue
           =access-token:hue
           =refresh-token:hue
         ==
@@ -140,6 +165,7 @@
         code  code.resp
         access-token  access-token.resp
         refresh-token  refresh-token.resp
+        group-names  group-names.resp
       ==
     `this :: error! TODO
     :: either retry (infinite loop potentially)
@@ -164,6 +190,21 @@
 ++  on-fail   on-fail:def
 --
 |_  bol=bowl:gall
+::
+++  refresh-groups
+|=  [=url:hue =username:hue =access-token:hue =group:hue]
+|^
+  =/  auth  `@t`(cat 3 'Bearer ' access-token)
+  =;  cag=cage
+    [%pass /group %arvo %k %fard %hue %refresh-groups cag]~
+  :-  %noun
+  !>  ^-  [@t (list [@t @t]) @t]
+  :+  `@t`(rap 3 url username '/groups' ~)
+  :~  ['Content-Type' 'application/json']
+      ['Authorization' auth]
+  ==
+  group
+--
 ::
 ++  change-light-state
 |=  [=url:hue =on:hue =bri:hue =username:hue =access-token:hue =group:hue]

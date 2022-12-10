@@ -7,6 +7,7 @@
 +$  access-token    @t
 +$  refresh-token   @t
 +$  group           @t
++$  group-names     (map group @t)
 ::
 +$  logs  (list json)
 +$  groups  (list json)
@@ -22,5 +23,6 @@
       =bri
       =code
       =group
+      =group-names
   ==
 --

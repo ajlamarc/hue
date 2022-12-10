@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import Urbit from '@urbit/http-api';
-import { MantineProvider, Image, Switch, Slider, Button, Card, Tabs, ScrollArea, Select } from '@mantine/core';
+import { MantineProvider, Image, Switch, Slider, Button, Card, Tabs, ScrollArea, Select, Table, Loader } from '@mantine/core';
 import hue_off from "./assets/hue-off.png";
 import hue_on from "./assets/hue-on.png";
 
@@ -36,12 +36,24 @@ function downloadBlob(content, filename, contentType) {
   pom.click();
 }
 
+const groupsToData = (groups: Object) => {
+  const data = [{ value: '0', label: 'All' }];
+  for (const [key, value] of Object.entries(groups)) {
+    data.push({ value: key, label: value });
+  }
+  return data;
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 export function App() {
+  const [loading, setLoading] = useState(false);
   const [configured, setConfigured] = useState(false);
   const [on, setOn] = useState(false);
   const [bri, setBri] = useState(254);
   const [logs, setLogs] = useState([]);
   const [group, setGroup] = useState('0');
+  const [data, setData] = useState({ value: '0', label: 'All' });
   const redirect_url_base = window.location.href
   const setupLink = `https://account.meethue.com/get-token/?client_id=eazPdMZBG9LHfGBoid7tDmZrzCe7EF3V&response_type=code&devicename=urbhue-device-app&appid=urbhue&deviceid=urbhue-device&redirect_url_base=${redirect_url_base}&app_name=UrbHue`;
 
@@ -51,6 +63,7 @@ export function App() {
       console.log(data);
       setOn(data['on']);
       setBri(data['bri']);
+      setData(groupsToData(data['group-names']));
       setGroup(data['group']);
       getLogs();
       // getGroups();
@@ -64,13 +77,11 @@ export function App() {
       else if (urlParams.has('code') && agentCode == '') { // register code
         const newCode = urlParams.get('code');
         submitCode(newCode);
-        setConfigured(true);
       }
     });
   }, []);
 
   const getLogs = async () => {
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
     await sleep(1000);  // let the new card be executed first
 
     api.scry({ app: 'hue', path: '/logs' }).then((logs) => {
@@ -78,7 +89,7 @@ export function App() {
     });
   }
 
-  const changeCurrGroup = (group: string) => {
+  const changeCurrGroup = async (group: string) => {
     api.poke({
       app: 'hue',
       mark: 'hue-action',
@@ -86,6 +97,13 @@ export function App() {
     });
     setGroup(group);
     // scry for /update again (on and bri)? after they have been updated for the changed group.
+    await sleep(500);
+    api.scry({ app: 'hue', path: '/update' }).then((data) => {
+      console.log(data);
+      setOn(data['on']);
+      setBri(data['bri']);
+      setData(groupsToData(data['group-names']));
+    });
   }
 
   const toggle = (_on: boolean) => {
@@ -106,12 +124,24 @@ export function App() {
     })
   }
 
-  const submitCode = (_code: string) => {
+  const submitCode = async (_code: string) => {
+    setLoading(true);
     api.poke({
       app: 'hue',
       mark: 'hue-action',
       json: { code: _code },
     })
+    await sleep(10000);
+    api.scry({ app: 'hue', path: '/update' }).then((data) => {
+      console.log(data);
+      setOn(data['on']);
+      setBri(data['bri']);
+      setData(groupsToData(data['group-names']));
+      setGroup(data['group']);
+      getLogs();
+      setConfigured(true);
+      setLoading(false);
+    });
   }
 
   return (
@@ -136,24 +166,41 @@ export function App() {
                   <div className='pt-6'>
                     <div className='flex'>
                       <Switch color='yellow' className='flex-grow' checked={on} onChange={(e) => toggle(e.currentTarget.checked)} />
-                      <Select color='yellow' placeholder='Choose Group' value={group} data={[{ value: '0', label: 'All Lights' }, { value: '2', label: 'demo' }]} onChange={changeCurrGroup} />
+                      <Select color='yellow' placeholder='Choose Group' value={group} data={data} onChange={changeCurrGroup} />
                     </div>
 
-                    <Slider color='yellow' className='pt-6' value={bri} min={1} max={254} disabled={!on} onChange={setBri} onChangeEnd={set_bri} />
+                    <Slider color='yellow' className='pt-6' label={null} value={bri} min={1} max={254} disabled={!on} onChange={setBri} onChangeEnd={set_bri} />
                   </div>
                 ) : (<Button variant="light" color="yellow" fullWidth mt="md" radius="md" onClick={() => {
                   window.open(setupLink, '_self');
                 }}>
-                  Setup
+                  {loading ? <Loader color='yellow' size='sm' /> : 'Setup'}
                 </Button>)}
               </Tabs.Panel>
 
               <Tabs.Panel value='logs' pt='xs' className='h-96'>
                 <ScrollArea style={{ height: 325 }} type='auto'>
-                  {logs.map((log, i) => (
-                    <p key={i}>time:{log[0]} group:{log[1]} on:{log[2].toString()} bri:{log[3]}</p>
-                  )
-                  )}
+                  <Table>
+                    <thead>
+                      <tr>
+                        <th>Time</th>
+                        <th>Group</th>
+                        <th>On</th>
+                        <th>Bri</th>
+                      </tr>
+                    </thead>
+                    <tbody>{
+                      logs.map((log, i) => (
+                        <tr key={i}>
+                          <td>{log[0]}</td>
+                          <td>{log[1]}</td>
+                          <td>{log[2].toString()}</td>
+                          <td>{log[3]}</td>
+                        </tr>
+                      )
+                      )
+                    }</tbody>
+                  </Table>
                 </ScrollArea>
                 <div className='flex pt-6'>
                   <a href="" className='flex-grow text-blue-600' onClick={() => downloadBlob(arrayToCsv(logs), 'export.csv', 'text/csv;charset=utf-8;')}>Export logs to CSV</a>

@@ -29,7 +29,6 @@
 =/  resp  `@t`q.data.u.full-file.client-response.q.res
 =/  jon  (de-json:html resp)
 =/  tokens  (tokens-from-json (need jon))
-::~&  >>  tokens
 :: ************* End Request 1 *************
 :: if requests 2 and 3 fail, we can't use the same code to get access and refresh tokens again
 :: consider running the following requests in a child thread, and always returning the tokens.
@@ -66,7 +65,25 @@
 ?~  full-file.client-response.q.res
   (strand-fail:strand %no-body ~)
 =.  resp  `@t`q.data.u.full-file.client-response.q.res
-:: ************* End Request 3 *************
 =/  usr  (snag 0 `(list @t)`(username-from-json (need (de-json:html resp))))
-::~&  >>  [username=usr tokens]
-(pure:m !>([username=usr code=code tokens]))
+:: ************* End Request 3 *************
+::
+::  *********** Request 4: Get names of all groups.  This duplicates
+::  the first request of refresh-groups.hoon, but we want the groups ready
+::  as soon as setup is completed. ***********
+=.  url  `@t`(rap 3 'https://api.meethue.com/route/api/' usr '/groups' ~)
+=/  =request:http  [%'GET' url headers ~]
+=/  =task:iris  [%request request *outbound-config:iris]
+=/  =card:agent:gall  [%pass /http-req %arvo %i task]
+;<  ~  bind:m  (send-raw-card:strandio card)
+;<  res=(pair wire sign-arvo)  bind:m  take-sign-arvo:strandio
+?.  ?=([%iris %http-response %finished *] q.res)
+  (strand-fail:strand %bad-sign ~)
+?~  full-file.client-response.q.res
+  (strand-fail:strand %no-body ~)
+=/  resp  `@t`q.data.u.full-file.client-response.q.res
+=/  jon  (de-json:html resp)
+=/  name-map  (groups-from-json (need jon))
+::  *********** End Request 4 ***********
+::
+(pure:m !>([usr code name-map tokens]))
