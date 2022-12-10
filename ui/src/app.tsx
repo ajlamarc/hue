@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import Urbit from '@urbit/http-api';
-import { MantineProvider, Image, Switch, Slider, Button, Card, Tabs, ScrollArea } from '@mantine/core';
+import { MantineProvider, Image, Switch, Slider, Button, Card, Tabs, ScrollArea, Select } from '@mantine/core';
 import hue_off from "./assets/hue-off.png";
 import hue_on from "./assets/hue-on.png";
 
@@ -41,6 +41,7 @@ export function App() {
   const [on, setOn] = useState(false);
   const [bri, setBri] = useState(254);
   const [logs, setLogs] = useState([]);
+  const [group, setGroup] = useState('0');
   const redirect_url_base = window.location.href
   const setupLink = `https://account.meethue.com/get-token/?client_id=eazPdMZBG9LHfGBoid7tDmZrzCe7EF3V&response_type=code&devicename=urbhue-device-app&appid=urbhue&deviceid=urbhue-device&redirect_url_base=${redirect_url_base}&app_name=UrbHue`;
 
@@ -50,7 +51,9 @@ export function App() {
       console.log(data);
       setOn(data['on']);
       setBri(data['bri']);
+      setGroup(data['group']);
       getLogs();
+      // getGroups();
       const agentCode = data['code'];
 
       const queryString = window.location.search;
@@ -73,6 +76,16 @@ export function App() {
     api.scry({ app: 'hue', path: '/logs' }).then((logs) => {
       setLogs(logs);
     });
+  }
+
+  const changeCurrGroup = (group: string) => {
+    api.poke({
+      app: 'hue',
+      mark: 'hue-action',
+      json: { group: group }
+    });
+    setGroup(group);
+    // scry for /update again (on and bri)? after they have been updated for the changed group.
   }
 
   const toggle = (_on: boolean) => {
@@ -106,7 +119,7 @@ export function App() {
       <div className='flex items-center justify-center h-screen'>
         <div className='w-96'>
           <Card shadow="sm" p="lg" radius="md" withBorder className='flex flex-col'>
-            <Tabs defaultValue='light'>
+            <Tabs color='yellow' defaultValue='light'>
               <Tabs.List>
                 <Tabs.Tab value='light'>Lights</Tabs.Tab>
                 <Tabs.Tab value='logs'>Logs</Tabs.Tab>
@@ -120,11 +133,15 @@ export function App() {
                   />
                 </Card.Section>
                 {configured ? (
-                  <>
-                    <Switch checked={on} onChange={(e) => toggle(e.currentTarget.checked)} />
-                    <Slider value={bri} min={1} max={254} disabled={!on} onChange={setBri} onChangeEnd={set_bri} />
-                  </>
-                ) : (<Button variant="light" color="blue" fullWidth mt="md" radius="md" onClick={() => {
+                  <div className='pt-6'>
+                    <div className='flex'>
+                      <Switch color='yellow' className='flex-grow' checked={on} onChange={(e) => toggle(e.currentTarget.checked)} />
+                      <Select color='yellow' placeholder='Choose Group' value={group} data={[{ value: '0', label: 'All Lights' }, { value: '2', label: 'demo' }]} onChange={changeCurrGroup} />
+                    </div>
+
+                    <Slider color='yellow' className='pt-6' value={bri} min={1} max={254} disabled={!on} onChange={setBri} onChangeEnd={set_bri} />
+                  </div>
+                ) : (<Button variant="light" color="yellow" fullWidth mt="md" radius="md" onClick={() => {
                   window.open(setupLink, '_self');
                 }}>
                   Setup
@@ -134,7 +151,7 @@ export function App() {
               <Tabs.Panel value='logs' pt='xs' className='h-96'>
                 <ScrollArea style={{ height: 325 }} type='auto'>
                   {logs.map((log, i) => (
-                    <p key={i}>time:{log[0]} on:{log[1].toString()} brightness:{log[2]}</p>
+                    <p key={i}>time:{log[0]} group:{log[1]} on:{log[2].toString()} bri:{log[3]}</p>
                   )
                   )}
                 </ScrollArea>

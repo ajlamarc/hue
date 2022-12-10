@@ -16,6 +16,7 @@
     :~  [%toggle bo]
         [%bri ni]
         [%code so]
+        [%group so]
     ==
   --
 ++  grad  %noun

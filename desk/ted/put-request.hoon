@@ -5,8 +5,8 @@
 |=  arg=vase
 =/  m  (strand ,vase)
 ^-  form:m
-=/  [url=@t headers=(list [@t @t]) body=(unit octs)]
-  !<  [@t (list [@t @t]) (unit octs)]  arg
+=/  [url=@t headers=(list [@t @t]) body=(unit octs) group=@t]
+  !<  [@t (list [@t @t]) (unit octs) @t]  arg
 =/  =request:http  [%'PUT' url headers body]
 =/  =task:iris  [%request request *outbound-config:iris]
 =/  =card:agent:gall  [%pass /http-req %arvo %i task]
@@ -18,5 +18,5 @@
   (strand-fail:strand %no-body ~)
 =/  resp  `@t`q.data.u.full-file.client-response.q.res
 =/  jon  (de-json:html resp)
-=/  state  (state-from-json (need jon))
+=/  state  (state-from-json group (need jon))
 (pure:m !>([->:state +<+:state]))

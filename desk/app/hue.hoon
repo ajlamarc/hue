@@ -18,6 +18,7 @@
       =on:hue
       =bri:hue
       =logs:hue
+      =group:hue
     ==
 ::
 +$  card  card:agent:gall
@@ -38,6 +39,7 @@
     url  'https://api.meethue.com/route/api/'
     on  %.n
     bri  254
+    group  '0'
   ==
 ++  on-save
   ^-  vase
@@ -57,6 +59,7 @@
   ::  %toggle: turn on/off the lights
   ::  %bri:  change brightness (0-254). Assumes lights are on.
   ::  %code: pass code to backend for generating tokens.
+  ::  %group: change group to control
   ::
   ^-  (quip card _this)
   ?>  ?=(%hue-action mark)
@@ -65,15 +68,18 @@
       %toggle
     :_  this
     %-  change-light-state:hc
-    [url +.act bri username access-token]
+    [url +.act bri username access-token group]
   ::
       %bri
     :_  this
     %-  change-light-state:hc
-    [url %.y +.act username access-token]
+    [url %.y +.act username access-token group]
   ::
       %code
     [(setup-with-code +.act) this]
+  ::
+      %group
+    `this(group +.act)
   ==
 ++  on-watch  on-watch:def
 ++  on-leave  on-leave:def
@@ -85,10 +91,13 @@
   ^-  (unit (unit cage))
   ?+    path  ~|(bad-scry-path/path !!)
       [%x %update ~]
-    ``json+!>((update-to-json [on bri code]))
+    ``json+!>((update-to-json [on bri code group]))
       ::
       [%x %logs ~]
     ``json+!>(a+(limo logs))
+    ::   ::
+    ::   [%x %groups ~]
+    :: ``json+!>(a+(limo groups))
   ==
 ++  on-agent  on-agent:def
 ++  on-arvo
@@ -108,7 +117,9 @@
       =/  state  q.q.p.p.sign
       =/  new-on  ;;(? -.state)
       =/  new-bri  ;;(@ud +.state)
-      =/  new-log  a+(limo ~[(sect:enjs:format now.bol) b+new-on (numb:enjs:format new-bri)])
+      =/  new-log  a+(limo ~[(sect:enjs:format now.bol) s+group b+new-on (numb:enjs:format new-bri)])
+      ?:  (gte (lent logs) 10)
+        `this(on new-on, bri new-bri, logs (welp ~[new-log] (snip logs)))
       `this(on new-on, bri new-bri, logs (welp ~[new-log] logs))
     `this :: error! TODO
     ::
@@ -155,19 +166,20 @@
 |_  bol=bowl:gall
 ::
 ++  change-light-state
-|=  [=url:hue =on:hue =bri:hue =username:hue =access-token:hue]
+|=  [=url:hue =on:hue =bri:hue =username:hue =access-token:hue =group:hue]
 |^
   =/  body  ~[['on' b+on] ['bri' n+`@t`(scot %ud bri)]]
   =/  auth  `@t`(cat 3 'Bearer ' access-token)
   =;  cag=cage
     [%pass /light %arvo %k %fard %hue %put-request cag]~
   :-  %noun
-  !>  ^-  [@t (list [@t @t]) (unit octs)]
-  :-  `@t`(rap 3 url username '/groups/0/action' ~)
-  :_  (encode-request-body body)
+  !>  ^-  [@t (list [@t @t]) (unit octs) @t]
+  :^  `@t`(rap 3 url username '/groups/' group '/action' ~)
   :~  ['Content-Type' 'application/json']
       ['Authorization' auth]
   ==
+  (encode-request-body body)
+  group
 --
 ::
 ++  setup-with-code

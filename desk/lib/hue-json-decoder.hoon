@@ -22,12 +22,17 @@
       :~  username+so
   ==  ==
 ++  state-from-json
+  |=  [group=@t state=json]
   =,  dejs:format
+  =/  s-on   `@t`(rap 3 '/groups/' group '/action/on' ~)
+  =/  s-bri  `@t`(rap 3 '/groups/' group '/action/bri' ~)
+  %-
   %-  ar
   %-  ot
   :~  :-  %success
       %-  of
-      :~  '/groups/0/action/on'^bo
-          '/groups/0/action/bri'^ni
+      :~  s-on^bo
+          s-bri^ni
   ==  ==
+  state
 --
