@@ -1,11 +1,11 @@
 :~
   title+'hue'
-  info+'demo for the hue lightbulb application on urbit'
+  info+'Control Philips Hue bulbs from Mars'
   color+0x10.0000
-  version+[0 0 1]
-  website+'https://dalten.org/'
-  license+'REKT'
+  version+[1 0 0]
+  website+'https://www.ajlamarc.com/'
+  license+'MIT'
   image+'https://pbs.twimg.com/profile_images/1563190365095505921/BH7MiViE_400x400.jpg'
   base+'hue'
-  glob-http+['https://gateway.pinata.cloud/ipfs/QmaEbLWc1ckuD6QLESKbcUNimqk9Dabm95P4N9xuLAhSfn' 0v2.9soje.mo0m0.15dio.2t1ll.ao33p]
+  glob-http+['https://gateway.pinata.cloud/ipfs/Qma8gPmrSvvXhEH7vw12mzCL2euPdHYEkVDxfe4cGLrcNe' 0v5.ltknd.9r198.8c8rc.qbefj.8om29]
 ==
