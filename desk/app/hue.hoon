@@ -138,13 +138,11 @@
       =/  new-on  ;;(? -.state)
       =/  new-bri  ;;(@ud +.state)
       =/  new-log  a+(limo ~[(sect:enjs:format now.bol) s+group b+new-on (numb:enjs:format new-bri)])
-      =/  l
-        %+  welp
-          ~[new-log]
+      =/  old-logs
         ?:  (gte (lent logs) 10)
           (snip logs)
         logs
-      `this(on new-on, bri new-bri, logs l)
+      `this(on new-on, bri new-bri, logs (welp ~[new-log] old-logs))
     `this :: error! TODO
     ::
       [%setup ~]
