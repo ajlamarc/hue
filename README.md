@@ -1,43 +1,27 @@
 # hue
 
-## running locally
-make a fakezod using part one of this guide: https://www.ajlamarc.com/blog/2022-11-19-urbit-setup/ and configure it to recognize a hue desk.
+## Hard reset instructions
 
-```hoon
-~zod:dojo> |commit %base
-~zod:dojo> |new-desk %hue
-~zod:dojo> |mount %hue
-~zod:dojo> |exit
-```
+If controlling bulbs from UrbHue stops functioning,
+start by unlinking the bridge.  Here's how to do that:
 
-Watch this desk into zod:
-```bash
-~/urbit$ watch cp -LR hue/desk/* zod/hue/
-```
+1. Navigate to the `logs` tab inside hue, and click on `unlink`.
 
-Start up agent:
-```hoon
-~zod:dojo> |commit %hue
-~zod:dojo> |install our %hue
-~zod:dojo> :hue +dbug
-```
+![unlink](images/unlink.png)
 
-Start up frontend
-```bash
-~/urbit/hue/ui$ npm i && npm run dev
-```
-Ensure you are logged in, should be good to go after that!
+2. Login to the Philips website, and click into your home:
 
-## Debugging
+![home](images/home.png)
 
-If controlling the bulbs becomes permanently corrupted,
-start by unlinking the bridge from UrbHue / urbhue.
-There is a link for this in the `logs` tab of the application.
+3. Scroll down to "applications" and revoke access for `urbhue` and `UrbHue`:
 
-Then hard restart the agent:
+![remove](images/remove.png)
+
+4. That's it for the Philips side.  Back on Urbit, open up the terminal (use webterm if hosted) and run the following commands:
+
 ```hoon
 ~zod:dojo> |nuke %hue
-~zod:dojo> |rein %hue [& %hue]
+~zod:dojo> |revive %urbhue
 ```
 
-Then you should be prompted to redo the setup process on the frontend.
+1. Reopen the UrbHue application, and you should be prompted to redo the setup process.

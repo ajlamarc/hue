@@ -84,7 +84,13 @@
     %-  refresh-groups:hc
     [url username access-token +.act]
   ==
-++  on-watch  on-watch:def
+++  on-watch
+  |=  =path
+  ^-  (quip card _this)
+  ?+    path  (on-watch:def path)
+      [%update ~]
+    `this
+  ==
 ++  on-leave  on-leave:def
 ++  on-peek
   |=  =path
@@ -107,6 +113,7 @@
   |=  [=wire sign=sign-arvo]
   ::
   ::  wire types:
+  ::  /group: resp. from group change
   ::  /light:  resp from light state change
   ::  /setup:  resp. from setup-bridge. Contains auth/tokens.
   ::  /refresh: behn alert to refresh tokens
@@ -157,7 +164,8 @@
           =refresh-token:hue
         ==
         q.p.p.sign
-      :-  (set-refresh-timer:hc now.bol)
+      ~&  >>  resp
+      :-  (welp ~[[%give %fact ~[/update] %json !>((update-to-json [on bri code.resp group group-names.resp]))]] (set-refresh-timer:hc now.bol))
       %=  this
         username  username.resp
         code  code.resp
