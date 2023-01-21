@@ -164,7 +164,6 @@
           =refresh-token:hue
         ==
         q.p.p.sign
-      ~&  >>  resp
       :-  (welp ~[[%give %fact ~[/update] %json !>((update-to-json [on bri code.resp group group-names.resp]))]] (set-refresh-timer:hc now.bol))
       %=  this
         username  username.resp
