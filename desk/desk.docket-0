@@ -1,11 +1,11 @@
 :~
   title+'hue'
   info+'Control Philips Hue bulbs from Mars'
-  color+0x10.0000
-  version+[1 0 0]
+  color+0xf0.b43d
+  version+[1 0 1]
   website+'https://www.ajlamarc.com/'
   license+'MIT'
-  image+'https://pbs.twimg.com/profile_images/1563190365095505921/BH7MiViE_400x400.jpg'
+  image+'https://i.imgur.com/czmkmoK.png'
   base+'hue'
-  glob-http+['https://gateway.pinata.cloud/ipfs/Qma8gPmrSvvXhEH7vw12mzCL2euPdHYEkVDxfe4cGLrcNe' 0v5.ltknd.9r198.8c8rc.qbefj.8om29]
+  glob-http+['https://gateway.pinata.cloud/ipfs/Qmat3x4EGf6hyFKGdVJzksobndpWmXwRGP5mqefLtCNGEu' 0v3.or88l.i2g61.j4om0.9omb3.ri63e]
 ==

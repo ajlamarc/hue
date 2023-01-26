@@ -201,7 +201,7 @@
 |^
   =/  auth  `@t`(cat 3 'Bearer ' access-token)
   =;  cag=cage
-    [%pass /group %arvo %k %fard %hue %refresh-groups cag]~
+    [%pass /group %arvo %k %fard %urbhue %refresh-groups cag]~
   :-  %noun
   !>  ^-  [@t (list [@t @t]) @t]
   :+  `@t`(rap 3 url username '/groups' ~)
@@ -217,7 +217,7 @@
   =/  body  ~[['on' b+on] ['bri' n+`@t`(scot %ud bri)]]
   =/  auth  `@t`(cat 3 'Bearer ' access-token)
   =;  cag=cage
-    [%pass /light %arvo %k %fard %hue %put-request cag]~
+    [%pass /light %arvo %k %fard %urbhue %put-request cag]~
   :-  %noun
   !>  ^-  [@t (list [@t @t]) (unit octs) @t]
   :^  `@t`(rap 3 url username '/groups/' group '/action' ~)
@@ -231,7 +231,7 @@
 ++  setup-with-code
 |=  [=code:hue]
 ^-  (list card)
-  [%pass /setup %arvo %k %fard %hue %setup-bridge noun+!>(code)]~
+  [%pass /setup %arvo %k %fard %urbhue %setup-bridge noun+!>(code)]~
 ::
 ++  set-refresh-timer
 |=  [now=@da]
@@ -241,7 +241,7 @@
 |=  [=refresh-token:hue]
 ^-  (list card)
   =;  cag=cage
-    [%pass /tokens %arvo %k %fard %hue %post-for-tokens cag]~
+    [%pass /tokens %arvo %k %fard %urbhue %post-for-tokens cag]~
   :-  %noun
   !>  ^-  [url=@t headers=(list [@t @t]) body=(unit octs)]
   :-  'https://api.meethue.com/oauth2/refresh?grant_type=refresh_token'
